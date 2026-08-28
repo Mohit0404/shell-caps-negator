@@ -19,13 +19,25 @@ jobs:
       - name: Install Debian Build Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y debhelper dpkg-dev apt-utils build-essential
+          sudo apt-get install -y debhelper dpkg-dev apt-utils build-essential devscripts
 
       - name: Build the .deb package
         run: |
           cd main-repo
+
+          # 1. Extract the version number by stripping the 'v' (e.g., v1.0.2 -> 1.0.2)
+          VERSION=${GITHUB_REF_NAME#v}
+
+          # 2. Tell the Debian tools who is making this change
+          export DEBEMAIL="mohitpawar0404@gmail.com"
+          export DEBFULLNAME="Mohit"
+
+          # 3. Automatically add a new entry to the top of debian/changelog
+          dch -v "${VERSION}-1" "Automated GitHub Release ${VERSION}"
+
+          # 4. Build the package with the newly injected version
           dpkg-buildpackage -us -uc -b
-          
+
       - name: Upload .deb to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
