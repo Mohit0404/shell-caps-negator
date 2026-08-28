@@ -68,14 +68,14 @@ jobs:
           
           # Generate Packages file
           dpkg-scanpackages --multiversion pool/ > Packages
-          gzip -k -9 Packages
+          gzip -k -f -9 Packages
           
           # Generate Release file
           apt-ftparchive release . > Release
           
           # Sign the Release file
-          gpg --default-key ${{ env.GPG_KEY_ID }} -abs -o Release.gpg Release
-          gpg --default-key ${{ env.GPG_KEY_ID }} --clearsign -o InRelease Release
+          gpg --yes --default-key ${{ env.GPG_KEY_ID }} -abs -o Release.gpg Release
+          gpg --yes --default-key ${{ env.GPG_KEY_ID }} --clearsign -o InRelease Release
 
       - name: Commit and Push to gh-pages
         run: |
