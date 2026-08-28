@@ -19,10 +19,10 @@ You can install this utility directly via `apt` using the secure, signed GitHub 
 
 ```bash
 # 1. Download the repository's public GPG key
-curl -fsSL [https://mohit0404.github.io/shell-caps-negator/public.key](https://mohit0404.github.io/shell-caps-negator/public.key) | sudo gpg --dearmor -o /usr/share/keyrings/shell-caps-negator-archive-keyring.gpg
+curl -fsSL https://mohit0404.github.io/shell-caps-negator/public.key | sudo gpg --dearmor -o /usr/share/keyrings/shell-caps-negator-archive-keyring.gpg
 
 # 2. Add the custom repository to your APT sources
-echo "deb [signed-by=/usr/share/keyrings/shell-caps-negator-archive-keyring.gpg] [https://mohit0404.github.io/shell-caps-negator/](https://mohit0404.github.io/shell-caps-negator/) ./" | sudo tee /etc/apt/sources.list.d/shell-caps-negator.list > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/shell-caps-negator-archive-keyring.gpg] https://mohit0404.github.io/shell-caps-negator/ ./" | sudo tee /etc/apt/sources.list.d/shell-caps-negator.list > /dev/null
 
 # 3. Update the package cache and install
 sudo apt update
