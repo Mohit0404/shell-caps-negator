@@ -1,4 +1,4 @@
-name: Build and Release Debian Package
+name: Build and Publish APT Repository
 
 on:
   push:
@@ -6,25 +6,70 @@ on:
       - 'v*'
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout repository
+      - name: Checkout main branch
         uses: actions/checkout@v4
+        with:
+          path: main-repo
 
       - name: Install Debian Build Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y debhelper dpkg-dev
+          sudo apt-get install -y debhelper dpkg-dev apt-utils
 
       - name: Build the .deb package
         run: |
-          # Build binary package only, unsigned
+          cd main-repo
           dpkg-buildpackage -us -uc -b
-
+          
       - name: Upload .deb to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ../shell-caps-negator_*.deb
+          files: ./*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-repo
+
+      - name: Import GPG Key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import
+          echo "GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec:' | cut -d':' -f5 | head -n 1)" >> $GITHUB_ENV
+
+      - name: Generate and Sign APT Repository
+        run: |
+          # Create the correct folder structure
+          mkdir -p gh-pages-repo/pool/main
+          
+          # Move the built .deb into the APT pool
+          mv ./*.deb gh-pages-repo/pool/main/
+          
+          cd gh-pages-repo
+          
+          # Generate Packages file
+          dpkg-scanpackages --multiversion pool/ > Packages
+          gzip -k -9 Packages
+          
+          # Generate Release file
+          apt-ftparchive release . > Release
+          
+          # Sign the Release file
+          gpg --default-key ${{ env.GPG_KEY_ID }} -abs -o Release.gpg Release
+          gpg --default-key ${{ env.GPG_KEY_ID }} --clearsign -o InRelease Release
+
+      - name: Commit and Push to gh-pages
+        run: |
+          cd gh-pages-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pool/ Packages Packages.gz Release Release.gpg InRelease
+          git commit -m "Update signed APT repository for version ${{ github.ref_name }}"
+          git push origin gh-pages
