@@ -1,0 +1,14 @@
+Source: shell-caps-negator
+Section: utils
+Priority: optional
+Maintainer: mohit0404 <mohitpawar0404@gmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+
+Package: shell-caps-negator
+Architecture: all
+Depends: ${misc:Depends}
+Description: Auto-corrects accidental ALL CAPS shell commands prefixed with a tilde.
+ A lightweight Bash and Zsh utility that catches invalid commands prefixed 
+ with a tilde (e.g., ~GREP), rapidly converts them to lowercase, appends the 
+ correct syntax to the user's shell history, and executes them seamlessly.

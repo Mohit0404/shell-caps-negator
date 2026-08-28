@@ -1,0 +1,53 @@
+name: Publish Signed APT Repository
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-repo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Download new .deb release asset
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          version: 'latest'
+          file: 'shell-caps-negator_.*\.deb'
+          regex: true
+          target: 'pool/main/'
+
+      - name: Install APT tools
+        run: sudo apt-get update && sudo apt-get install -y dpkg-dev apt-utils
+
+      - name: Import GPG Key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import
+          echo "GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec:' | cut -d':' -f5 | head -n 1)" >> $GITHUB_ENV
+
+      - name: Generate Repository Metadata
+        run: |
+          # 1. Generate Packages file
+          dpkg-scanpackages --multiversion pool/ > Packages
+          gzip -k -9 Packages
+          
+          # 2. Generate Release file with SHA256 hashes
+          apt-ftparchive release . > Release
+          
+          # 3. Sign the Release file
+          gpg --default-key ${{ env.GPG_KEY_ID }} -abs -o Release.gpg Release
+          gpg --default-key ${{ env.GPG_KEY_ID }} --clearsign -o InRelease Release
+
+      - name: Commit and Push to gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pool/ Packages Packages.gz Release Release.gpg InRelease
+          git commit -m "Update signed APT repository for latest release"
+          git push origin gh-pages

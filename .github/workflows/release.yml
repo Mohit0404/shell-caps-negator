@@ -1,0 +1,30 @@
+name: Build and Release Debian Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Debian Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y debhelper dpkg-dev
+
+      - name: Build the .deb package
+        run: |
+          # Build binary package only, unsigned
+          dpkg-buildpackage -us -uc -b
+
+      - name: Upload .deb to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ../shell-caps-negator_*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

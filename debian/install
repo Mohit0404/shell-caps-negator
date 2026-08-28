@@ -1,0 +1,2 @@
+src/negator.sh usr/share/shell-caps-negator/
+shell-caps-negator.sh etc/profile.d/
