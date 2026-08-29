@@ -49,3 +49,20 @@ Description: Auto-corrects accidental ALL CAPS shell commands prefixed with a ti
  with a tilde (e.g., ~GREP), rapidly converts them to lowercase, appends the
  correct syntax to the user's shell history, and executes them seamlessly.
 
+Package: shell-caps-negator
+Version: 1.0.6-1
+Architecture: all
+Maintainer: mohit0404 <mohitpawar0404@gmail.com>
+Installed-Size: 16
+Filename: pool/main/shell-caps-negator_1.0.6-1_all.deb
+Size: 2510
+MD5sum: 09cb4540ded18b04d78524bd28fd8b1b
+SHA1: 6135f17bcbc3f5851cca970f440d858406823eb5
+SHA256: 61151bd301ac687b0f7a32b909cab71df055f0f1253dc1a5975aef0d79e67bdb
+Section: utils
+Priority: optional
+Description: Auto-corrects accidental ALL CAPS shell commands prefixed with a tilde.
+ A lightweight Bash and Zsh utility that catches invalid commands prefixed
+ with a tilde (e.g., ~GREP), rapidly converts them to lowercase, appends the
+ correct syntax to the user's shell history, and executes them seamlessly.
+
